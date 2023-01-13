@@ -1,0 +1,4 @@
+node min(x: int) returns (out: int);
+let 
+    out = x -> if x < pre(out) then x else pre(out);
+tel

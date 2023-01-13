@@ -1,0 +1,11 @@
+node min(x : int) returns (out : int)
+var v : bool; v_1 : int; v_2 : bool; v_3 : int; v_4 : int;
+let
+  out = if v then 0 else v_4;
+  v_4 = if v_2 then x else v_3;
+  v_3 = pre out;
+  v_2 = (x < v_1);
+  v_1 = pre out;
+  v = true fby false
+tel
+

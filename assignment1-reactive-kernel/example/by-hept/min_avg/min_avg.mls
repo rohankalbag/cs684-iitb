@@ -1,0 +1,14 @@
+node min_avg(x : int; y : int) returns (out : int)
+var avg : int; v : int; v_1 : bool; v_2 : int; v_3 : bool; v_4 : int;
+    v_5 : int;
+let
+  out = if v_1 then avg else v_5;
+  v_5 = if v_3 then avg else v_4;
+  v_4 = pre out;
+  v_3 = (avg < v_2);
+  v_2 = pre out;
+  v_1 = true fby false;
+  avg = (v / 2);
+  v = (x + y)
+tel
+

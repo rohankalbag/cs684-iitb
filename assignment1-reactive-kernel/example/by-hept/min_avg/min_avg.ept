@@ -1,0 +1,6 @@
+node min_avg(x: int; y: int) returns (out: int);
+var avg: int;
+let
+    avg = (x + y)/2;
+    out = avg -> if avg < pre(out) then avg else pre(out); 
+tel
