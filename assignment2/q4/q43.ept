@@ -1,0 +1,18 @@
+node counter(x: bool; p: int) returns (y:int)
+let
+    y = if x then p+1 else p;
+tel
+
+node mutex<<n:int>>(ack: bool^n) returns (ok: bool)
+var ntrues: int;
+let
+    ntrues = fold<<n>>counter(ack, 0);
+    ok = if ntrues > 1 then false else true;
+tel
+
+(* node display(a0, a1, a2, a3: bool) returns (ok: bool)
+var a: bool^4;
+let
+    a = [a0, a1, a2, a3];
+    ok = mutex<<4>>(a);
+tel *)

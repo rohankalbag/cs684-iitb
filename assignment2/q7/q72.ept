@@ -1,0 +1,7 @@
+node smonitor(p,q: bool) returns (ok: bool)
+var ok1,ok2: bool;
+let
+    ok1 = p -> (pre(ok1) and p);
+    ok2 = q -> (pre(ok2) or q);
+    ok = ok1 and ok2; 
+tel

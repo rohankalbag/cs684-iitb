@@ -1,0 +1,43 @@
+node mxor(x, y: bool) returns (c: bool)
+let 
+    c = (x and not y) or ((not x) and y);
+tel
+
+node fa(x, y, cin: bool) returns (z, cout: bool)
+let 
+    z = mxor(mxor(cin, x), y); 
+    cout = if cin then (x or y) else (x and y); 
+tel
+
+node rippleadd<<n:int>>(a: bool^n; b: bool^n) returns (c: bool^n; over: bool)
+let
+    (c,over) = mapfold<<n>>fa(a, b, false);
+tel
+
+node countermodulo64() returns (q: bool^8)
+var count, one: bool^8;
+    ovf, cond: bool;
+    cnt: int;
+let 
+    reset
+        (count, ovf) = (false^8, false) -> rippleadd<<8>>(pre(count), one);
+        cnt = 0 -> pre(cnt) + 1;
+    every cond;
+    cond = false -> pre(cnt) = 63;
+    q = count;
+    one = true^1 @ false^7;
+tel
+
+(* node display() returns (c0,c1,c2,c3,c4,c5,c6,c7:bool)
+var c: bool^8;
+let
+    c = countermodulo64();
+    c0 = c[0];
+    c1 = c[1];
+    c2 = c[2];
+    c3 = c[3];
+    c4 = c[4];
+    c5 = c[5];
+    c6 = c[6];
+    c7 = c[7];
+tel *)

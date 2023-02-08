@@ -1,0 +1,2 @@
+If false is replaced with true in the fold statement, the heptagon node returns true always 
+irrespective of the contents of the five element boolean array.

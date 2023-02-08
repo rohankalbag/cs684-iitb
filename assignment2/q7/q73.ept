@@ -1,0 +1,20 @@
+node smonitor(a,b,c: bool) returns (ok: bool)
+(* Assumptions 
+    1) we consider c to be continuously on from the moment a is set (including cycle where a is set)
+       for it to be monitor to be true.
+    2) if both a and b are set then if c is true then its ok
+    3) if c is set and a is not yet set then this is and not ok
+*)
+var aset, con: bool;
+let
+    (* con checks whether c is continuously on after a is set *)
+    reset 
+        con = c -> pre(con) and c
+    every a = true;
+    (*aset checks whether a has been set in past and b is not yet set*)
+    reset
+        aset = a -> pre(aset) or a
+    every b = true;
+    (*we are finally testing aset => con*)
+    ok = if (c and not aset) then false else (not aset) or con;
+tel

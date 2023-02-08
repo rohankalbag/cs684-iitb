@@ -1,0 +1,2 @@
+This heptagon node returns true if there is a true value 
+in a boolean array of five elements else it returns false.

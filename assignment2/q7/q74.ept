@@ -1,0 +1,8 @@
+node smonitor(req, ack: bool) returns (ok: bool)
+var count: int;
+    cond: bool;
+let 
+    count = if req then (1 -> pre(count) + 1) else 0;
+    cond = if count >= 3 then true else false;
+    ok = (not cond) or ack; 
+tel
