@@ -1,20 +1,31 @@
 node smonitor(a,b,c: bool) returns (ok: bool)
 (* Assumptions 
-    1) we consider c to be continuously on from the moment a is set (including cycle where a is set)
-       for it to be monitor to be true.
-    2) if both a and b are set then if c is true then its ok
-    3) if c is set and a is not yet set then this is and not ok
+    1) we are checking for a p => q type condition
+       p: a has been set and b hasnt been set yet, so if p is not true ok is vacuously true
+    
+    2) q: c is continuously true from the moment a is set (including cycle where a is set)
+       till b is set (including the cycle where b is set).
+
+    3) if both a and b are set then, ok is set if c is set.
 *)
-var aset, con: bool;
+var aset, con, rstcon, rstaset: bool;
 let
     (* con checks whether c is continuously on after a is set *)
     reset 
         con = c -> pre(con) and c
-    every a = true;
+    every rstcon;
+    
     (*aset checks whether a has been set in past and b is not yet set*)
     reset
-        aset = a -> pre(aset) or a
-    every b = true;
-    (*we are finally testing aset => con*)
-    ok = if (c and not aset) then false else (not aset) or con;
+        aset = false -> pre(aset) or a
+    every rstaset;
+
+    (* rstaset is used to reset aset, aset is reset if the previous val of b is true *)
+    rstaset = false -> pre(b);
+
+    (* rstcon is used to reset con, con is reset if a is set and aset wasn't set (first a seen), or b is set *)
+    rstcon = ((a and not false -> pre(aset)) or b); 
+
+    (* we are finally testing aset => con (p implies q) *)
+    ok = (not aset) or con;
 tel
