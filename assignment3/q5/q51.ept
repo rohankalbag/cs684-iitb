@@ -1,0 +1,41 @@
+node traffic(carwait,second:bool) 
+      returns (maingreen, mainred, sidegreen, sidered, mainyellow, sideyellow:bool)
+(*a last common variable to keep track of whether it is a main -> side or side -> main transition,
+  basically to keep track of the previous state*)
+var last maintoside : bool;
+let
+  automaton
+    state Maingreen
+        var timegreen: int;
+        do  
+            timegreen = 180 -> if (((pre(timegreen)) > 0) and second) then 
+                                    pre(timegreen)-1  else pre(timegreen);
+           maingreen = true; mainred = false; mainyellow = false;
+           sidegreen = false; sidered = true; sideyellow = false;
+           maintoside = true;
+       until ((timegreen <= 0) and carwait) then Yellow
+    state Yellow
+        (*in yellow state both mainyellow and sideyellow will be high and rest of the
+          traffic light signals will be low, for a duration of 10s*)
+        var timeyellow: int;
+        do 
+            timeyellow = 10 -> if((pre(timeyellow) > 0) and second) then
+                                 pre(timeyellow) - 1 else pre(timeyellow);
+            maingreen = false; mainred = false; mainyellow = true;
+            sidegreen = false; sidered = false; sideyellow = true;
+        (*if timer is up, and prevstate was Maingreen, then next state is Sidegreen*)
+        (*if timer is up, and prevstate was Sidegreen, then next state is Maingreen*)
+        until ((timeyellow <= 0) and maintoside) then Sidegreen
+            | ((timeyellow <= 0) and (not maintoside)) then Maingreen 
+    state Sidegreen
+        var timegreen: int;
+        do  
+            timegreen = 60 ->
+                if (((pre(timegreen)) > 0) and second) then pre(timegreen)-1
+                           else pre(timegreen);
+           maingreen = false; mainred = true; mainyellow = false;
+           sidegreen = true; sidered = false; sideyellow = false;
+           maintoside = false;
+       until ((timegreen <= 0) and not carwait) then Yellow
+  end
+tel

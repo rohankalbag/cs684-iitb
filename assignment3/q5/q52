@@ -1,0 +1,5 @@
+in every cycle where maingreen is high, either sidered or sideyellow should be high, and sidegreen should be low 
+in every cycle where sidegreen is high, either mainred or mainyellow should be high, and maingreen should be low
+only one among sidegreen, sidered and sideyellow should be high in any given cycle
+only one among maingreen, mainred and mainyellow should be high in any given cycle
+the mainroad should be serviced every once in a while, even if there are always cars waiting in side road to avoid congestion in mainroad
