@@ -1,0 +1,47 @@
+node controller(flame: bool; sec: bool) 
+    returns (gas, spark: bool; t, st8:int)
+var last timestamp: int = 1;
+let
+    t = timestamp;
+    automaton 
+        state Start
+            do 
+                gas = false;
+                spark = false;
+                st8 = 1;
+            until(flame = true) then Burningnormal
+                | (flame = false) then Gasaccumulate
+        state Burningnormal
+            do
+                gas = true;
+                spark = false;
+                timestamp = 1;
+                st8 = 2;
+            until(flame = false) then Gasaccumulate
+        state Gasaccumulate
+            do 
+                timestamp = 1 -> last timestamp + 1;
+                gas = true;
+                spark = false;
+                st8 = 3;
+            (* until(timestamp >= 15) then Sparkflame *)
+            until(timestamp >= 5) then Sparkflame
+        state Sparkflame
+            do
+                spark = true;
+                timestamp = last timestamp + 1;
+                gas = true;
+                st8 = 4;
+            until(flame = true) then Burningnormal
+            unless(last timestamp >= 7) then Dissipate
+            (* unless(last timestamp >= 60) then Dissipate *)
+        state Dissipate
+            do
+                gas = false;
+                spark = false;
+                timestamp = 1 -> last timestamp + 1;
+                st8 = 5;
+            until(timestamp >= 10) then Gasaccumulate
+            (* until(timestamp >= 120) then Gasaccumulate *)
+    end
+tel
