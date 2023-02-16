@@ -1,12 +1,12 @@
 node controller(flame: bool; sec: bool) 
-    returns (gas, spark: bool;ts,s:int)
+    returns (gas, spark: bool)
     (*timestamp keeps track of time for which gas is true without flame*)
-var last timestamp: int = 1; 
+var last timestamp: int = 1;
+    last s: int;
 let
-    ts = timestamp;
     automaton 
         state Start
-            (*initial start state for controller where no actuation happens*)
+            (*initial start reset state for controller where no actuation happens*)
             do 
                 gas = false;
                 spark = false;
@@ -57,5 +57,7 @@ let
                 s = 5;
             (*if 120 seconds have elapsed, now proceed to accumulate gas*)
             until(cooldown_timer >= 120) then Gasaccumulate
+            (*if for some reason, flame turns on (unlikely however as spark is false and also it will explode if flame goes on) go to burning normal*)
+            unless(flame = true) then Burningnormal
     end
 tel
