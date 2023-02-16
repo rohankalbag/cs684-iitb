@@ -1,47 +1,61 @@
 node controller(flame: bool; sec: bool) 
-    returns (gas, spark: bool; t, st8:int)
-var last timestamp: int = 1;
+    returns (gas, spark: bool;ts,s:int)
+    (*timestamp keeps track of time for which gas is true without flame*)
+var last timestamp: int = 1; 
 let
-    t = timestamp;
+    ts = timestamp;
     automaton 
         state Start
+            (*initial start state for controller where no actuation happens*)
             do 
                 gas = false;
                 spark = false;
-                st8 = 1;
-            until(flame = true) then Burningnormal
+                s = 1;
+            unless(flame = true) then Burningnormal
                 | (flame = false) then Gasaccumulate
         state Burningnormal
+            (*normal burning state, the flame is on, so keep gas on, don't produce sparks since the
+              flame is already present, and reset timestamp*)
             do
                 gas = true;
                 spark = false;
                 timestamp = 1;
-                st8 = 2;
-            until(flame = false) then Gasaccumulate
+                s = 2;
+            (*if flame extinguishes then change state*)
+            until(flame = false) then Gasaccumulate 
         state Gasaccumulate
+            (*gas accumulation state, gas is filling up, don't spark, keep track of time
+              for which the gas is on by incrementing timestamp*)
             do 
                 timestamp = 1 -> last timestamp + 1;
                 gas = true;
                 spark = false;
-                st8 = 3;
-            (* until(timestamp >= 15) then Sparkflame *)
-            until(timestamp >= 5) then Sparkflame
+                s = 3;
+            (*if waited for 15 seconds go to spark the gas*)
+            until(timestamp >= 15) then Sparkflame
+            (*if for some reason, flame turns on (unlikely however as spark is false) go to burning normal*)
+            unless(flame = true) then Burningnormal
         state Sparkflame
+            (*sparking state, keep gas on, and increment timestamp as well, keep sparking until there is a flame*)
             do
                 spark = true;
                 timestamp = last timestamp + 1;
                 gas = true;
-                st8 = 4;
+                s = 4;
+            (*if flame is on, then shift to normal burning*)
             until(flame = true) then Burningnormal
-            unless(last timestamp >= 7) then Dissipate
-            (* unless(last timestamp >= 60) then Dissipate *)
+            (*make a strong check whether gas has been on for more than 60s, if so immediately go to dissipate emergency state
+              without any sparks to avoid explosion*)
+            unless(last timestamp >= 60) then Dissipate
         state Dissipate
+            (*emergency state, switch off gas and wait for 120s for gas to dissipate to make no explosion, then switch to gas accumulate*)
+            var cooldown_timer: int;
             do
                 gas = false;
                 spark = false;
-                timestamp = 1 -> last timestamp + 1;
-                st8 = 5;
-            until(timestamp >= 10) then Gasaccumulate
-            (* until(timestamp >= 120) then Gasaccumulate *)
+                cooldown_timer = 1 -> pre(cooldown_timer) + 1;
+                s = 5;
+            (*if 120 seconds have elapsed, now proceed to accumulate gas*)
+            until(cooldown_timer >= 120) then Gasaccumulate
     end
 tel

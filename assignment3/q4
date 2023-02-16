@@ -1,3 +1,3 @@
-12
-s1, s2, s4 are modes with no internal substates, meanwhile s3 has two concurrent internal statemachines with 3 substates each,
-thus the total number of modes = 3 + (3*3) = 12 (3*3 for the s3 as two sub state machines are concurrent).
+7
+s1, s2, s4 are modes with no internal sub-states, meanwhile s3 has two concurrent internal state-machines with 3 sub-states each, of which only 2 are reachable in each
+namely State1_1 and State2_1, and State2_1 and State2_2 respectively, thus the total number of modes = 3 + (2*2) = 7 (2*2 for the s3 as two sub state-machines are concurrent).
