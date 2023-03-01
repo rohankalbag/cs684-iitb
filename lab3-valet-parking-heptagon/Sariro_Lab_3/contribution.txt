@@ -1,0 +1,3 @@
+Team Sariro
+
+The three of us (Sankalp, Rohan and Rishabh) worked on the .ept file code together over in a google meeting. Using collaborative editing of code on visual studio code (vsshare), we edited the file simultaneously while discussing. The simulation video was taken by Rohan and the readme was made by Rishabh.
