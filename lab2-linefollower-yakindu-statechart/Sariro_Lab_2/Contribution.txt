@@ -1,0 +1,9 @@
+Team:
+
+Rohan Rajesh Kalbag - 20D170033
+Rishabh Ravi - 200260041
+Sankalp Bhamare - 200110096
+
+Contribution:
+
+Sankalp worked on Start, Stop and PID logic states. Rishabh and Rohan worked on straight, turn left, turn right and backright, backleft states. Rishabh made the screen recording, Rohan worked on the readme documentation as well.  
