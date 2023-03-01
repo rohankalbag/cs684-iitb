@@ -1,4 +1,4 @@
-(*in simularion these threshold values were made 10*)
+(*in simulation these threshold values were made 10*)
 const white_line_threshold: int = 400
 const ir_obstacle_threshold: int = 400
 const ir_turn_right_threshold: int = 400
