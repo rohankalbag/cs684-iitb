@@ -1,44 +1,44 @@
-(*in simulation these threshold values were made 10*)
+(* in simulation these threshold values were made 10 *)
 const white_line_threshold: int = 400
 const ir_obstacle_threshold: int = 400
-const ir_turn_right_threshold: int = 400
-const ir_wall_dist_threshold: int  = 400
+const ir_wall_dist_threshold: int = 400
 
-(*1/Kp, 1/Ki, 1/Kd values*)
+(* 1/Kp, 1/Ki, 1/Kd values *)
 const kp_inv: int = 1
 const ki_inv: int = 1000
 const kd_inv: int = 10000000 
 
 node parkingnode(cfl, ccl, ccc, ccr, cfr, ifl, icl, icc, icr, ifr: int)
-    returns (dir:bool; vl, vr:int)
+    returns (dir:int; vl, vr:int)
 
 var
 last oas_busy: bool = false;
 tfl, tcl, tcc, tcr, tfr: bool;
-last timer: int = 0;
+last timer: int;
 last currst8: int;
 let
-    (*this is to check which state fsm is in, add primary cs to primary output and uncomment below line*)
-    (*cs = currst8;*) 
+    (* this is to check which state fsm is in, add primary cs to primary output and uncomment below line *)
+    (* cs = currst8; *)
     tfl = cfl < white_line_threshold;
     tcl = ccl < white_line_threshold;
     tcc = ccc < white_line_threshold;
     tcr = ccr < white_line_threshold;
     tfr = cfr < white_line_threshold;
+
     automaton 
-        
         state StartState do
+            dir = 1;
             currst8 = 0;
             vl = 100;
             vr = 100;
-            dir = true;
             oas_busy = false;
-        until not (tfl and tcl and tcc and tcr and tfr) then PID
+        unless not (tfl and tcl and tcc and tcr and tfr) then PID
         
         state PID 
         var error, error_integral, error_derivative, tpid, pid_value: int;
         do
             currst8 = 1;
+            dir = 1;
             error = ccr - ccl;
             error_integral = 0 -> (pre(error_integral) + error);
             error_derivative = 0 -> (error - pre(error));
@@ -46,81 +46,74 @@ let
             pid_value = if(tpid < -50) then -50 else if(tpid > 50) then 50 else tpid;
             vl = if pid_value = 0 then 100 else 50 - pid_value;
             vr = if pid_value = 0 then 100 else 50 + pid_value;
-            dir = true;
             oas_busy = false;
-        until (tfl and tcl and tcc and tcr and tfr) then StopState 
+        unless (tfl and tcl and tcc and tcr and tfr) then StopState 
         | icc < ir_obstacle_threshold then OAS
 
         state StopState do
             currst8 = 2;
-            dir = false;
+            dir = 0;
             vl = 0;
             vr = 0;
             oas_busy = false;
-        until (false) then StartState
         
         state OAS do
             automaton            
-                state MoveBack do
+                state FirstImmediateRightTurn do
                     currst8 = 3;
+                    dir = 3;
                     oas_busy = true;
-                    dir = false;
                     vl = 100;
                     vr = 100;
-                    timer = 10 -> if(pre(timer) > 0) then pre(timer) - 1 else 0;
-                until (timer <= 0) then FirstImmediateRightTurn
-                
-                state FirstImmediateRightTurn do
+                unless (ifl < ir_obstacle_threshold) and (icl > ir_obstacle_threshold) and (icc > ir_obstacle_threshold) then MoveFront
+
+                state MoveFront 
+                do
                     currst8 = 4;
                     oas_busy = true;
+                    dir = 1;
                     vl = 100;
-                    vr = 0;
-                    dir = true;
-                until (icl < ir_turn_right_threshold) then SecondImmediateRightTurn
+                    vr = 100;
+                    timer = 10 -> if(last timer > 0) then last timer - 1 else 0;
+                until (timer <= 0) then MaintainWallAlign
 
-                state SecondImmediateRightTurn do
-                    currst8 = 5;
-                    oas_busy = true;
-                    vl = 100;
-                    vr = 0;
-                    dir = true;
-                until (icl > ir_turn_right_threshold) then MaintainWallAlign
 
                 state MaintainWallAlign 
                 var turn_right: bool; 
                 do
-                    currst8 = 6;
+                    currst8 = 5;
                     oas_busy = true;
-                    dir = true;
+                    dir = 1;
                     turn_right = if(ifl < ir_wall_dist_threshold) then true else false;
                     vl = if(turn_right) then 100 else 0;
                     vr = if(turn_right) then 0 else 100;
-                until (tcc) then UnalignMoveBack
+                unless (tcc) then UnalignMoveFront
 
-                state UnalignMoveBack do
-                    currst8 = 7;
+                state UnalignMoveFront 
+                do
+                    currst8 = 6;
                     oas_busy = true;
-                    dir = false;
+                    dir = 1;
                     vl = 100;
                     vr = 100;
-                    timer = 10 -> if(pre(timer) > 0) then pre(timer) - 1 else 0;
+                    timer = 10 -> if(last timer > 0) then last timer - 1 else 0;
                 until (timer <= 0) then MoveRightTillWhiteLine
 
                 state MoveRightTillWhiteLine do
-                    currst8 = 8;
+                    currst8 = 7;
                     oas_busy = true;
-                    dir = true;
+                    dir = 3;
                     vl = 100;
-                    vr = 0;
-                until (tcc) then BotIsOnLine
+                    vr = 100;
+                unless (tcc) then BotIsOnLine
 
                 state BotIsOnLine do
-                    currst8 = 9;
-                    dir = false;
+                    currst8 = 8;
+                    dir = 0;
                     vl = 0;
                     vr = 0;
                     oas_busy = false;
-                end
+            end
             until (not oas_busy) then PID
         end    
 tel
