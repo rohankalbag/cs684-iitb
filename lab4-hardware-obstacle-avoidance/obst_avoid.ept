@@ -1,0 +1,114 @@
+
+node obstavoider(irf, irs: bool)
+    returns (dir, cs: int) 
+    (* 
+       0 - no motion
+       1 - forward
+       2 - left turn hard
+       3 - left turn soft
+       4 - right turn hard
+       5 - right turn soft
+       6 - backward
+    *)
+var
+last oas_busy: bool = false;
+last timer: int;
+last currst8: int;
+let
+    (* this is to check which state fsm is in, add primary cs to primary output and uncomment below line *)
+    cs = currst8;
+
+    automaton 
+        state Move 
+        do
+            currst8 = 1;
+            dir = 1;
+            oas_busy = false;
+        unless (irf) then OAS
+        
+        state OAS do
+            automaton  
+                state Brake do
+                    currst8 = 2;
+                    timer = 200 -> if(last timer > 0) then last timer - 1 else 0;
+                    dir = 6;
+                    oas_busy = true;
+                until (timer <= 0) then FirstRightTurn
+
+                state FirstRightTurn do
+                    currst8 = 3;
+                    dir = 4;
+                    oas_busy = true;
+                until (true) then MoveFront
+
+                state MoveFront 
+                do
+                    currst8 = 4;
+                    oas_busy = true;
+                    dir = 1;
+                unless (not irs) then MoveLittleBitFront2
+
+                state MoveLittleBitFront2 do
+                    currst8 = 44;
+                    timer = 6 -> if(last timer > 0) then last timer - 1 else 0;
+                    dir = 1;
+                    oas_busy = true;
+                until (timer <= 0) then FirstTurnLeft
+
+                state FirstTurnLeft
+                do 
+                    currst8 = 5;
+                    oas_busy = true;
+                    dir = 2;
+                until (true) then MoveLittleFront
+
+                state MoveLittleFront do
+                    currst8 = 4;
+                    timer = 8 -> if(last timer > 0) then last timer - 1 else 0;
+                    dir = 1;
+                    oas_busy = true;
+                until (timer <= 0) then SecondMoveFront
+
+                state SecondMoveFront 
+                do
+                    currst8 = 7;
+                    oas_busy = true;
+                    dir = 1;
+                unless (not irs) then MoveLittleBitFront3
+
+                state MoveLittleBitFront3 do
+                    currst8 = 77;
+                    timer = 4 -> if(last timer > 0) then last timer - 1 else 0;
+                    dir = 1;
+                    oas_busy = true;
+                until (timer <= 0) then SecondTurnLeft
+
+                state SecondTurnLeft
+                do 
+                    currst8 = 8;
+                    oas_busy = true;
+                    dir = 2;
+                until (true) then FinalFront
+
+                state FinalFront
+                do 
+                    currst8 = 9;
+                    dir = 1;
+                    timer = 4 -> if(last timer > 0) then last timer - 1 else 0;
+                    oas_busy = true;
+                until (timer <= 0) then FinalRight
+
+                state FinalRight do
+                    currst8 = 10;
+                    dir = 4;
+                    oas_busy = true;
+                until (true) then Exit
+
+                state Exit do
+                    currst8 = 11;
+                    dir = 0;
+                    oas_busy = false;
+            end
+            until (not oas_busy) then Move
+        end    
+tel

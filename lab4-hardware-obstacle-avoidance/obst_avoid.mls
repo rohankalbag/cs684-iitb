@@ -1,0 +1,384 @@
+type st_1 = St_1_OAS|St_1_Move
+type st = St_SecondTurnLeft|St_SecondMoveFront|St_MoveLittleFront|
+  St_MoveLittleBitFront3|St_MoveLittleBitFront2|St_MoveFront|
+  St_FirstTurnLeft|St_FirstRightTurn|St_FinalRight|St_FinalFront|St_Exit|
+  St_Brake
+node obstavoider(irf : bool; irs : bool) returns (dir : int; cs : int)
+var currst8 : int; timer : int; oas_busy : bool; oas_busy_1 : bool;
+    timer_1 : int; currst8_1 : int; pnr_1 : bool; nr_1 : bool; r_1 : bool;
+    ns_1 : st_1; s_1 : st_1; ck_1 : st_1; dir_St_1_Move : int;
+    oas_busy_St_1_Move : bool; timer_St_1_Move : int;
+    currst8_St_1_Move : int; ns_1_St_1_Move : st_1; nr_1_St_1_Move : bool;
+    dir_St_1_OAS : int; oas_busy_St_1_OAS : bool; timer_St_1_OAS : int;
+    currst8_St_1_OAS : int; ns_1_St_1_OAS : st_1; nr_1_St_1_OAS : bool;
+    pnr : bool; nr : bool; r : bool; ns : st; s : st; v : bool; v_39 : bool;
+    ck_3 : st; dir_St_1_OAS_St_Brake : int;
+    oas_busy_St_1_OAS_St_Brake : bool; timer_St_1_OAS_St_Brake : int;
+    currst8_St_1_OAS_St_Brake : int; ns_St_Brake : st; nr_St_Brake : bool;
+    dir_St_1_OAS_St_FirstRightTurn : int;
+    oas_busy_St_1_OAS_St_FirstRightTurn : bool;
+    timer_St_1_OAS_St_FirstRightTurn : int;
+    currst8_St_1_OAS_St_FirstRightTurn : int; ns_St_FirstRightTurn : st;
+    nr_St_FirstRightTurn : bool; dir_St_1_OAS_St_MoveFront : int;
+    oas_busy_St_1_OAS_St_MoveFront : bool; timer_St_1_OAS_St_MoveFront : int;
+    currst8_St_1_OAS_St_MoveFront : int; ns_St_MoveFront : st;
+    nr_St_MoveFront : bool; dir_St_1_OAS_St_MoveLittleBitFront2 : int;
+    oas_busy_St_1_OAS_St_MoveLittleBitFront2 : bool;
+    timer_St_1_OAS_St_MoveLittleBitFront2 : int;
+    currst8_St_1_OAS_St_MoveLittleBitFront2 : int;
+    ns_St_MoveLittleBitFront2 : st; nr_St_MoveLittleBitFront2 : bool;
+    dir_St_1_OAS_St_FirstTurnLeft : int;
+    oas_busy_St_1_OAS_St_FirstTurnLeft : bool;
+    timer_St_1_OAS_St_FirstTurnLeft : int;
+    currst8_St_1_OAS_St_FirstTurnLeft : int; ns_St_FirstTurnLeft : st;
+    nr_St_FirstTurnLeft : bool; dir_St_1_OAS_St_MoveLittleFront : int;
+    oas_busy_St_1_OAS_St_MoveLittleFront : bool;
+    timer_St_1_OAS_St_MoveLittleFront : int;
+    currst8_St_1_OAS_St_MoveLittleFront : int; ns_St_MoveLittleFront : st;
+    nr_St_MoveLittleFront : bool; dir_St_1_OAS_St_SecondMoveFront : int;
+    oas_busy_St_1_OAS_St_SecondMoveFront : bool;
+    timer_St_1_OAS_St_SecondMoveFront : int;
+    currst8_St_1_OAS_St_SecondMoveFront : int; ns_St_SecondMoveFront : st;
+    nr_St_SecondMoveFront : bool; dir_St_1_OAS_St_MoveLittleBitFront3 : int;
+    oas_busy_St_1_OAS_St_MoveLittleBitFront3 : bool;
+    timer_St_1_OAS_St_MoveLittleBitFront3 : int;
+    currst8_St_1_OAS_St_MoveLittleBitFront3 : int;
+    ns_St_MoveLittleBitFront3 : st; nr_St_MoveLittleBitFront3 : bool;
+    dir_St_1_OAS_St_SecondTurnLeft : int;
+    oas_busy_St_1_OAS_St_SecondTurnLeft : bool;
+    timer_St_1_OAS_St_SecondTurnLeft : int;
+    currst8_St_1_OAS_St_SecondTurnLeft : int; ns_St_SecondTurnLeft : st;
+    nr_St_SecondTurnLeft : bool; dir_St_1_OAS_St_FinalFront : int;
+    oas_busy_St_1_OAS_St_FinalFront : bool;
+    timer_St_1_OAS_St_FinalFront : int; currst8_St_1_OAS_St_FinalFront : int;
+    ns_St_FinalFront : st; nr_St_FinalFront : bool;
+    dir_St_1_OAS_St_FinalRight : int; oas_busy_St_1_OAS_St_FinalRight : bool;
+    timer_St_1_OAS_St_FinalRight : int; currst8_St_1_OAS_St_FinalRight : int;
+    ns_St_FinalRight : st; nr_St_FinalRight : bool;
+    dir_St_1_OAS_St_Exit : int; oas_busy_St_1_OAS_St_Exit : bool;
+    timer_St_1_OAS_St_Exit : int; currst8_St_1_OAS_St_Exit : int;
+    ns_St_Exit : st; nr_St_Exit : bool; v_32 : bool; v_33 : bool;
+    v_34 : bool; v_35 : bool; v_36 : bool; v_37 : int; v_38 : int;
+    v_25 : bool; v_26 : bool; v_27 : bool; v_28 : bool; v_29 : bool;
+    v_30 : int; v_31 : int; v_18 : bool; v_19 : bool; v_20 : bool;
+    v_21 : bool; v_22 : bool; v_23 : int; v_24 : int; v_11 : bool;
+    v_12 : bool; v_13 : bool; v_14 : bool; v_15 : bool; v_16 : int;
+    v_17 : int; v_4 : bool; v_5 : bool; v_6 : bool; v_7 : bool; v_8 : bool;
+    v_9 : int; v_10 : int; ck_2 : st; s_St_Brake : st; r_St_Brake : bool;
+    s_St_FirstRightTurn : st; r_St_FirstRightTurn : bool;
+    s_St_MoveFront : st; r_St_MoveFront : bool;
+    s_St_MoveLittleBitFront2 : st; r_St_MoveLittleBitFront2 : bool;
+    s_St_FirstTurnLeft : st; r_St_FirstTurnLeft : bool;
+    s_St_MoveLittleFront : st; r_St_MoveLittleFront : bool;
+    s_St_SecondMoveFront : st; r_St_SecondMoveFront : bool;
+    s_St_MoveLittleBitFront3 : st; r_St_MoveLittleBitFront3 : bool;
+    s_St_SecondTurnLeft : st; r_St_SecondTurnLeft : bool;
+    s_St_FinalFront : st; r_St_FinalFront : bool; s_St_FinalRight : st;
+    r_St_FinalRight : bool; s_St_Exit : st; r_St_Exit : bool; v_3 : st;
+    v_2 : bool; v_1 : bool; ck : st_1; s_1_St_1_Move : st_1;
+    r_1_St_1_Move : bool; s_1_St_1_OAS : st_1; r_1_St_1_OAS : bool;
+let
+  currst8_1 = pre currst8;
+  timer_1 = pre timer;
+  oas_busy_1 = false fby oas_busy;
+  pnr_1 = false fby nr_1;
+  ck_1 = s_1;
+  timer_St_1_Move = (timer_1 when St_1_Move(ck_1));
+  oas_busy_St_1_Move = false;
+  dir_St_1_Move = 1;
+  currst8_St_1_Move = 1;
+  nr_1_St_1_Move = false;
+  ns_1_St_1_Move = St_1_Move;
+  pnr = if (r_1 when St_1_OAS(ck_1)) then false else v_39;
+  v_39 = false fby nr;
+  ck_3 = s;
+  oas_busy_St_1_OAS_St_Brake = true;
+  dir_St_1_OAS_St_Brake = 6;
+  timer_St_1_OAS_St_Brake = if v_35 then 200 else v_38;
+  v_38 = if v_36 then v_37 else 0;
+  v_37 = (((timer_1 when St_1_OAS(ck_1)) when St_Brake(ck_3)) - 1);
+  v_36 = (((timer_1 when St_1_OAS(ck_1)) when St_Brake(ck_3)) > 0);
+  v_35 = if v_33 then true else v_34;
+  v_34 =
+    (((r_1 when St_1_OAS(ck_1)) when St_Brake(ck_3)) or
+     (r when St_Brake(ck_3)));
+  v_33 = true fby false;
+  currst8_St_1_OAS_St_Brake = 2;
+  nr_St_Brake = if v_32 then true else false;
+  ns_St_Brake = if v_32 then St_FirstRightTurn else St_Brake;
+  v_32 = (((timer when St_1_OAS(ck_1)) when St_Brake(ck_3)) <= 0);
+  timer_St_1_OAS_St_FirstRightTurn =
+    ((timer_1 when St_1_OAS(ck_1)) when St_FirstRightTurn(ck_3));
+  oas_busy_St_1_OAS_St_FirstRightTurn = true;
+  dir_St_1_OAS_St_FirstRightTurn = 4;
+  currst8_St_1_OAS_St_FirstRightTurn = 3;
+  nr_St_FirstRightTurn = if true then true else false;
+  ns_St_FirstRightTurn = if true then St_MoveFront else St_FirstRightTurn;
+  timer_St_1_OAS_St_MoveFront =
+    ((timer_1 when St_1_OAS(ck_1)) when St_MoveFront(ck_3));
+  dir_St_1_OAS_St_MoveFront = 1;
+  oas_busy_St_1_OAS_St_MoveFront = true;
+  currst8_St_1_OAS_St_MoveFront = 4;
+  nr_St_MoveFront = false;
+  ns_St_MoveFront = St_MoveFront;
+  oas_busy_St_1_OAS_St_MoveLittleBitFront2 = true;
+  dir_St_1_OAS_St_MoveLittleBitFront2 = 1;
+  timer_St_1_OAS_St_MoveLittleBitFront2 = if v_28 then 6 else v_31;
+  v_31 = if v_29 then v_30 else 0;
+  v_30 =
+    (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront2(ck_3)) - 1);
+  v_29 =
+    (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront2(ck_3)) > 0);
+  v_28 = if v_26 then true else v_27;
+  v_27 =
+    (((r_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront2(ck_3)) or
+     (r when St_MoveLittleBitFront2(ck_3)));
+  v_26 = true fby false;
+  currst8_St_1_OAS_St_MoveLittleBitFront2 = 44;
+  nr_St_MoveLittleBitFront2 = if v_25 then true else false;
+  ns_St_MoveLittleBitFront2 =
+    if v_25 then St_FirstTurnLeft else St_MoveLittleBitFront2;
+  v_25 =
+    (((timer when St_1_OAS(ck_1)) when St_MoveLittleBitFront2(ck_3)) <= 0);
+  timer_St_1_OAS_St_FirstTurnLeft =
+    ((timer_1 when St_1_OAS(ck_1)) when St_FirstTurnLeft(ck_3));
+  dir_St_1_OAS_St_FirstTurnLeft = 2;
+  oas_busy_St_1_OAS_St_FirstTurnLeft = true;
+  currst8_St_1_OAS_St_FirstTurnLeft = 5;
+  nr_St_FirstTurnLeft = if true then true else false;
+  ns_St_FirstTurnLeft = if true then St_MoveLittleFront else St_FirstTurnLeft;
+  oas_busy_St_1_OAS_St_MoveLittleFront = true;
+  dir_St_1_OAS_St_MoveLittleFront = 1;
+  timer_St_1_OAS_St_MoveLittleFront = if v_21 then 8 else v_24;
+  v_24 = if v_22 then v_23 else 0;
+  v_23 = (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleFront(ck_3)) - 1);
+  v_22 = (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleFront(ck_3)) > 0);
+  v_21 = if v_19 then true else v_20;
+  v_20 =
+    (((r_1 when St_1_OAS(ck_1)) when St_MoveLittleFront(ck_3)) or
+     (r when St_MoveLittleFront(ck_3)));
+  v_19 = true fby false;
+  currst8_St_1_OAS_St_MoveLittleFront = 4;
+  nr_St_MoveLittleFront = if v_18 then true else false;
+  ns_St_MoveLittleFront =
+    if v_18 then St_SecondMoveFront else St_MoveLittleFront;
+  v_18 = (((timer when St_1_OAS(ck_1)) when St_MoveLittleFront(ck_3)) <= 0);
+  timer_St_1_OAS_St_SecondMoveFront =
+    ((timer_1 when St_1_OAS(ck_1)) when St_SecondMoveFront(ck_3));
+  dir_St_1_OAS_St_SecondMoveFront = 1;
+  oas_busy_St_1_OAS_St_SecondMoveFront = true;
+  currst8_St_1_OAS_St_SecondMoveFront = 7;
+  nr_St_SecondMoveFront = false;
+  ns_St_SecondMoveFront = St_SecondMoveFront;
+  oas_busy_St_1_OAS_St_MoveLittleBitFront3 = true;
+  dir_St_1_OAS_St_MoveLittleBitFront3 = 1;
+  timer_St_1_OAS_St_MoveLittleBitFront3 = if v_14 then 4 else v_17;
+  v_17 = if v_15 then v_16 else 0;
+  v_16 =
+    (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront3(ck_3)) - 1);
+  v_15 =
+    (((timer_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront3(ck_3)) > 0);
+  v_14 = if v_12 then true else v_13;
+  v_13 =
+    (((r_1 when St_1_OAS(ck_1)) when St_MoveLittleBitFront3(ck_3)) or
+     (r when St_MoveLittleBitFront3(ck_3)));
+  v_12 = true fby false;
+  currst8_St_1_OAS_St_MoveLittleBitFront3 = 77;
+  nr_St_MoveLittleBitFront3 = if v_11 then true else false;
+  ns_St_MoveLittleBitFront3 =
+    if v_11 then St_SecondTurnLeft else St_MoveLittleBitFront3;
+  v_11 =
+    (((timer when St_1_OAS(ck_1)) when St_MoveLittleBitFront3(ck_3)) <= 0);
+  timer_St_1_OAS_St_SecondTurnLeft =
+    ((timer_1 when St_1_OAS(ck_1)) when St_SecondTurnLeft(ck_3));
+  dir_St_1_OAS_St_SecondTurnLeft = 2;
+  oas_busy_St_1_OAS_St_SecondTurnLeft = true;
+  currst8_St_1_OAS_St_SecondTurnLeft = 8;
+  nr_St_SecondTurnLeft = if true then true else false;
+  ns_St_SecondTurnLeft = if true then St_FinalFront else St_SecondTurnLeft;
+  oas_busy_St_1_OAS_St_FinalFront = true;
+  timer_St_1_OAS_St_FinalFront = if v_7 then 4 else v_10;
+  v_10 = if v_8 then v_9 else 0;
+  v_9 = (((timer_1 when St_1_OAS(ck_1)) when St_FinalFront(ck_3)) - 1);
+  v_8 = (((timer_1 when St_1_OAS(ck_1)) when St_FinalFront(ck_3)) > 0);
+  v_7 = if v_5 then true else v_6;
+  v_6 =
+    (((r_1 when St_1_OAS(ck_1)) when St_FinalFront(ck_3)) or
+     (r when St_FinalFront(ck_3)));
+  v_5 = true fby false;
+  dir_St_1_OAS_St_FinalFront = 1;
+  currst8_St_1_OAS_St_FinalFront = 9;
+  nr_St_FinalFront = if v_4 then true else false;
+  ns_St_FinalFront = if v_4 then St_FinalRight else St_FinalFront;
+  v_4 = (((timer when St_1_OAS(ck_1)) when St_FinalFront(ck_3)) <= 0);
+  timer_St_1_OAS_St_FinalRight =
+    ((timer_1 when St_1_OAS(ck_1)) when St_FinalRight(ck_3));
+  oas_busy_St_1_OAS_St_FinalRight = true;
+  dir_St_1_OAS_St_FinalRight = 4;
+  currst8_St_1_OAS_St_FinalRight = 10;
+  nr_St_FinalRight = if true then true else false;
+  ns_St_FinalRight = if true then St_Exit else St_FinalRight;
+  timer_St_1_OAS_St_Exit = ((timer_1 when St_1_OAS(ck_1)) when St_Exit(ck_3));
+  oas_busy_St_1_OAS_St_Exit = false;
+  dir_St_1_OAS_St_Exit = 0;
+  currst8_St_1_OAS_St_Exit = 11;
+  nr_St_Exit = false;
+  ns_St_Exit = St_Exit;
+  dir_St_1_OAS =
+    merge ck_3
+      (St_Exit -> dir_St_1_OAS_St_Exit)
+      (St_FinalRight -> dir_St_1_OAS_St_FinalRight)
+      (St_FinalFront -> dir_St_1_OAS_St_FinalFront)
+      (St_SecondTurnLeft -> dir_St_1_OAS_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> dir_St_1_OAS_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> dir_St_1_OAS_St_SecondMoveFront)
+      (St_MoveLittleFront -> dir_St_1_OAS_St_MoveLittleFront)
+      (St_FirstTurnLeft -> dir_St_1_OAS_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> dir_St_1_OAS_St_MoveLittleBitFront2)
+      (St_MoveFront -> dir_St_1_OAS_St_MoveFront)
+      (St_FirstRightTurn -> dir_St_1_OAS_St_FirstRightTurn)
+      (St_Brake -> dir_St_1_OAS_St_Brake);
+  oas_busy_St_1_OAS =
+    merge ck_3
+      (St_Exit -> oas_busy_St_1_OAS_St_Exit)
+      (St_FinalRight -> oas_busy_St_1_OAS_St_FinalRight)
+      (St_FinalFront -> oas_busy_St_1_OAS_St_FinalFront)
+      (St_SecondTurnLeft -> oas_busy_St_1_OAS_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> oas_busy_St_1_OAS_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> oas_busy_St_1_OAS_St_SecondMoveFront)
+      (St_MoveLittleFront -> oas_busy_St_1_OAS_St_MoveLittleFront)
+      (St_FirstTurnLeft -> oas_busy_St_1_OAS_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> oas_busy_St_1_OAS_St_MoveLittleBitFront2)
+      (St_MoveFront -> oas_busy_St_1_OAS_St_MoveFront)
+      (St_FirstRightTurn -> oas_busy_St_1_OAS_St_FirstRightTurn)
+      (St_Brake -> oas_busy_St_1_OAS_St_Brake);
+  timer_St_1_OAS =
+    merge ck_3
+      (St_Exit -> timer_St_1_OAS_St_Exit)
+      (St_FinalRight -> timer_St_1_OAS_St_FinalRight)
+      (St_FinalFront -> timer_St_1_OAS_St_FinalFront)
+      (St_SecondTurnLeft -> timer_St_1_OAS_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> timer_St_1_OAS_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> timer_St_1_OAS_St_SecondMoveFront)
+      (St_MoveLittleFront -> timer_St_1_OAS_St_MoveLittleFront)
+      (St_FirstTurnLeft -> timer_St_1_OAS_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> timer_St_1_OAS_St_MoveLittleBitFront2)
+      (St_MoveFront -> timer_St_1_OAS_St_MoveFront)
+      (St_FirstRightTurn -> timer_St_1_OAS_St_FirstRightTurn)
+      (St_Brake -> timer_St_1_OAS_St_Brake);
+  currst8_St_1_OAS =
+    merge ck_3
+      (St_Exit -> currst8_St_1_OAS_St_Exit)
+      (St_FinalRight -> currst8_St_1_OAS_St_FinalRight)
+      (St_FinalFront -> currst8_St_1_OAS_St_FinalFront)
+      (St_SecondTurnLeft -> currst8_St_1_OAS_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> currst8_St_1_OAS_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> currst8_St_1_OAS_St_SecondMoveFront)
+      (St_MoveLittleFront -> currst8_St_1_OAS_St_MoveLittleFront)
+      (St_FirstTurnLeft -> currst8_St_1_OAS_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> currst8_St_1_OAS_St_MoveLittleBitFront2)
+      (St_MoveFront -> currst8_St_1_OAS_St_MoveFront)
+      (St_FirstRightTurn -> currst8_St_1_OAS_St_FirstRightTurn)
+      (St_Brake -> currst8_St_1_OAS_St_Brake);
+  ns =
+    merge ck_3
+      (St_Exit -> ns_St_Exit)(St_FinalRight -> ns_St_FinalRight)
+      (St_FinalFront -> ns_St_FinalFront)
+      (St_SecondTurnLeft -> ns_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> ns_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> ns_St_SecondMoveFront)
+      (St_MoveLittleFront -> ns_St_MoveLittleFront)
+      (St_FirstTurnLeft -> ns_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> ns_St_MoveLittleBitFront2)
+      (St_MoveFront -> ns_St_MoveFront)
+      (St_FirstRightTurn -> ns_St_FirstRightTurn)(St_Brake -> ns_St_Brake);
+  nr =
+    merge ck_3
+      (St_Exit -> nr_St_Exit)(St_FinalRight -> nr_St_FinalRight)
+      (St_FinalFront -> nr_St_FinalFront)
+      (St_SecondTurnLeft -> nr_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> nr_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> nr_St_SecondMoveFront)
+      (St_MoveLittleFront -> nr_St_MoveLittleFront)
+      (St_FirstTurnLeft -> nr_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> nr_St_MoveLittleBitFront2)
+      (St_MoveFront -> nr_St_MoveFront)
+      (St_FirstRightTurn -> nr_St_FirstRightTurn)(St_Brake -> nr_St_Brake);
+  ck_2 = if (r_1 when St_1_OAS(ck_1)) then St_Brake else v_3;
+  v_3 = St_Brake fby ns;
+  r_St_Brake = (pnr when St_Brake(ck_2));
+  s_St_Brake = St_Brake;
+  r_St_FirstRightTurn = (pnr when St_FirstRightTurn(ck_2));
+  s_St_FirstRightTurn = St_FirstRightTurn;
+  r_St_MoveFront = if v_2 then true else (pnr when St_MoveFront(ck_2));
+  s_St_MoveFront = if v_2 then St_MoveLittleBitFront2 else St_MoveFront;
+  v_2 = not(((irs when St_1_OAS(ck_1)) when St_MoveFront(ck_2)));
+  r_St_MoveLittleBitFront2 = (pnr when St_MoveLittleBitFront2(ck_2));
+  s_St_MoveLittleBitFront2 = St_MoveLittleBitFront2;
+  r_St_FirstTurnLeft = (pnr when St_FirstTurnLeft(ck_2));
+  s_St_FirstTurnLeft = St_FirstTurnLeft;
+  r_St_MoveLittleFront = (pnr when St_MoveLittleFront(ck_2));
+  s_St_MoveLittleFront = St_MoveLittleFront;
+  r_St_SecondMoveFront =
+    if v_1 then true else (pnr when St_SecondMoveFront(ck_2));
+  s_St_SecondMoveFront =
+    if v_1 then St_MoveLittleBitFront3 else St_SecondMoveFront;
+  v_1 = not(((irs when St_1_OAS(ck_1)) when St_SecondMoveFront(ck_2)));
+  r_St_MoveLittleBitFront3 = (pnr when St_MoveLittleBitFront3(ck_2));
+  s_St_MoveLittleBitFront3 = St_MoveLittleBitFront3;
+  r_St_SecondTurnLeft = (pnr when St_SecondTurnLeft(ck_2));
+  s_St_SecondTurnLeft = St_SecondTurnLeft;
+  r_St_FinalFront = (pnr when St_FinalFront(ck_2));
+  s_St_FinalFront = St_FinalFront;
+  r_St_FinalRight = (pnr when St_FinalRight(ck_2));
+  s_St_FinalRight = St_FinalRight;
+  r_St_Exit = (pnr when St_Exit(ck_2));
+  s_St_Exit = St_Exit;
+  s =
+    merge ck_2
+      (St_Exit -> s_St_Exit)(St_FinalRight -> s_St_FinalRight)
+      (St_FinalFront -> s_St_FinalFront)
+      (St_SecondTurnLeft -> s_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> s_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> s_St_SecondMoveFront)
+      (St_MoveLittleFront -> s_St_MoveLittleFront)
+      (St_FirstTurnLeft -> s_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> s_St_MoveLittleBitFront2)
+      (St_MoveFront -> s_St_MoveFront)
+      (St_FirstRightTurn -> s_St_FirstRightTurn)(St_Brake -> s_St_Brake);
+  r =
+    merge ck_2
+      (St_Exit -> r_St_Exit)(St_FinalRight -> r_St_FinalRight)
+      (St_FinalFront -> r_St_FinalFront)
+      (St_SecondTurnLeft -> r_St_SecondTurnLeft)
+      (St_MoveLittleBitFront3 -> r_St_MoveLittleBitFront3)
+      (St_SecondMoveFront -> r_St_SecondMoveFront)
+      (St_MoveLittleFront -> r_St_MoveLittleFront)
+      (St_FirstTurnLeft -> r_St_FirstTurnLeft)
+      (St_MoveLittleBitFront2 -> r_St_MoveLittleBitFront2)
+      (St_MoveFront -> r_St_MoveFront)
+      (St_FirstRightTurn -> r_St_FirstRightTurn)(St_Brake -> r_St_Brake);
+  nr_1_St_1_OAS = if v then true else false;
+  ns_1_St_1_OAS = if v then St_1_Move else St_1_OAS;
+  v = not((oas_busy when St_1_OAS(ck_1)));
+  dir = merge ck_1 (St_1_OAS -> dir_St_1_OAS)(St_1_Move -> dir_St_1_Move);
+  oas_busy =
+    merge ck_1
+      (St_1_OAS -> oas_busy_St_1_OAS)(St_1_Move -> oas_busy_St_1_Move);
+  timer =
+    merge ck_1 (St_1_OAS -> timer_St_1_OAS)(St_1_Move -> timer_St_1_Move);
+  currst8 =
+    merge ck_1 (St_1_OAS -> currst8_St_1_OAS)(St_1_Move -> currst8_St_1_Move);
+  ns_1 = merge ck_1 (St_1_OAS -> ns_1_St_1_OAS)(St_1_Move -> ns_1_St_1_Move);
+  nr_1 = merge ck_1 (St_1_OAS -> nr_1_St_1_OAS)(St_1_Move -> nr_1_St_1_Move);
+  ck = St_1_Move fby ns_1;
+  r_1_St_1_Move =
+    if (irf when St_1_Move(ck)) then true else (pnr_1 when St_1_Move(ck));
+  s_1_St_1_Move = if (irf when St_1_Move(ck)) then St_1_OAS else St_1_Move;
+  r_1_St_1_OAS = (pnr_1 when St_1_OAS(ck));
+  s_1_St_1_OAS = St_1_OAS;
+  s_1 = merge ck (St_1_OAS -> s_1_St_1_OAS)(St_1_Move -> s_1_St_1_Move);
+  r_1 = merge ck (St_1_OAS -> r_1_St_1_OAS)(St_1_Move -> r_1_St_1_Move);
+  cs = currst8
+tel
+
