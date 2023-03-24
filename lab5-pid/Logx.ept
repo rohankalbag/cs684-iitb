@@ -1,0 +1,51 @@
+const start_fwd_speed: int = 70
+const pid_fwd_speed: int = 40
+const white_threshold: int = 400
+const black_threshold: int = 10000
+const w_far: int = 2
+const w_cent: int = 30
+
+const i_kp: int = 1
+const i_kd: int  = 140
+const i_ki: int  = 10000
+
+const max_drive: int = 110
+
+node pidline(cfr, ccr, ccc, ccl, cfl: int) 
+   returns (dir, v_left, v_right, cs, out_drive: int)  
+   (*  
+     0 - forward 
+     1 - back
+     2 - left turn 
+     3 - right turn
+     4 - soft left
+     5 - soft right
+     6 - stop 
+   *) 
+ var last current_state: int;
+
+ let 
+   (* this is to check which state fsm is in, add primary cs to primary output and uncomment below line *) 
+   cs = current_state; 
+  
+   automaton
+
+    state PIDFollower 
+    var error_sum, raw_drive, drive, error: int;
+    do
+      error = cfr / w_far + ccr / w_cent - ccl / w_cent - cfl / w_far ;
+      error_sum = 0 -> (pre(error_sum) + error);
+      raw_drive = ( error - ( 0->pre(error)  )) / i_kd +  error / i_kp + error_sum / i_ki;
+      current_state = 2;
+  
+      drive = if(raw_drive > max_drive) then max_drive else if(raw_drive < 0-max_drive) then 0-max_drive else raw_drive;
+      v_left = pid_fwd_speed - drive;
+      v_right = pid_fwd_speed + drive;
+      out_drive = drive;
+      dir = 0;
+   
+   
+  end
+
+  
+ tel

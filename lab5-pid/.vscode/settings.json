@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "logic.c": "cpp",
+        "chrono": "cpp",
+        "random": "cpp",
+        "limits": "cpp"
+    }
+}
