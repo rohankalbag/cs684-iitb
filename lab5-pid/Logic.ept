@@ -37,7 +37,7 @@ node pidline(cfr, ccr, ccc, ccl, cfl: int)
       dir = 6;
       current_state = 1;
       out_drive = 0;
-    until(cfr < white_threshold or ccr < white_threshold or ccc < white_threshold or ccl < white_threshold or cfl > white_threshold) then PIDFollower
+    until(cfr > white_threshold or ccr > white_threshold or ccc > white_threshold or ccl > white_threshold or cfl > white_threshold) then PIDFollower
 
 
     state PIDFollower 

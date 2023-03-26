@@ -1,4 +1,4 @@
-/* --- Generated the 26/3/2023 at 19:9 --- */
+/* --- Generated the 26/3/2023 at 22:7 --- */
 /* --- heptagon compiler, version 1.05.00 (compiled mon. jan. 9 12:23:25 CET 2023) --- */
 /* --- Command line: /usr/local/bin/heptc -target c -s pidlinex -hepts Logic.ept --- */
 
@@ -91,10 +91,10 @@ void Logic__pidline_step(int cfr, int ccr, int ccc, int ccl, int cfl,
       v_right_St_Start = 0;
       v_left_St_Start = 0;
       v_38 = (cfl>Logic__white_threshold);
-      v_36 = (ccl<Logic__white_threshold);
-      v_34 = (ccc<Logic__white_threshold);
-      v_32 = (ccr<Logic__white_threshold);
-      v_31 = (cfr<Logic__white_threshold);
+      v_36 = (ccl>Logic__white_threshold);
+      v_34 = (ccc>Logic__white_threshold);
+      v_32 = (ccr>Logic__white_threshold);
+      v_31 = (cfr>Logic__white_threshold);
       v_33 = (v_31||v_32);
       v_35 = (v_33||v_34);
       v_37 = (v_35||v_36);

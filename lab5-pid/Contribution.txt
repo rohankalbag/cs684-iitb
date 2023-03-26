@@ -1,0 +1,1 @@
+Rishabh and Rohan worked on the hardware testing, supervisor interfacing code and tuning of the alphabot. The main ept file was made by Sankalp.
