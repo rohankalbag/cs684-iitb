@@ -1,4 +1,4 @@
-/* --- Generated the 25/3/2023 at 2:31 --- */
+/* --- Generated the 26/3/2023 at 19:1 --- */
 /* --- heptagon compiler, version 1.05.00 (compiled mon. jan. 9 12:23:25 CET 2023) --- */
 /* --- Command line: /usr/local/bin/heptc -target c -s pidlinex -hepts Logic.ept --- */
 
@@ -7,10 +7,10 @@
 
 #include "logic_types.h"
 typedef struct Logic__pidline_mem {
-  int v_12;
-  int v_10;
-  int v_8;
-  int v_6;
+  int v_21;
+  int v_19;
+  int v_17;
+  int v_15;
   Logic__st ck;
   int pnr;
   int current_state_1;

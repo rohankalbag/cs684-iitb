@@ -30,6 +30,16 @@ node pidline(cfr, ccr, ccc, ccl, cfl: int)
   
    automaton
 
+    state Start
+    do
+      v_left = 0;
+      v_right = 0;
+      dir = 6;
+      current_state = 1;
+      out_drive = 0;
+    until(cfr < white_threshold or ccr < white_threshold or ccc < white_threshold or ccl < white_threshold or cfl > white_threshold) then PIDFollower
+
+
     state PIDFollower 
     var error_sum, raw_drive, drive, error: int;
     do
@@ -43,9 +53,14 @@ node pidline(cfr, ccr, ccc, ccl, cfl: int)
       v_right = pid_fwd_speed + drive;
       out_drive = drive;
       dir = 0;
-   
-   
+    until(cfr > white_threshold and ccr > white_threshold and ccc > white_threshold and ccl > white_threshold and cfl > white_threshold) then ReachedDest
+    
+    state ReachedDest
+    do
+      v_left = 0;
+      v_right = 0;
+      dir = 6;
+      current_state = 3;
+      out_drive = 0;
   end
-
-  
  tel
