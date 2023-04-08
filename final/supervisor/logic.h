@@ -1,4 +1,4 @@
-/* --- Generated the 9/4/2023 at 4:7 --- */
+/* --- Generated the 9/4/2023 at 4:23 --- */
 /* --- heptagon compiler, version 1.05.00 (compiled mon. jan. 9 12:23:25 CET 2023) --- */
 /* --- Command line: /usr/local/bin/heptc -target c -s finallogic -hepts Logic.ept --- */
 
@@ -46,12 +46,10 @@ typedef struct Logic__obstacleavoider_mem {
   int v_35;
   int v_43;
   int v_40;
+  int v_55;
+  int v_52;
+  int v_51;
   int v_48;
-  int v_46;
-  int v_60;
-  int v_57;
-  int v_56;
-  int v_53;
   Logic__st ck;
   int pnr;
   int penc_r_target_1;
@@ -74,8 +72,8 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
                                  Logic__obstacleavoider_mem* self);
 
 typedef struct Logic__finallogic_mem {
-  Logic__st_1 v_70;
-  int v_71;
+  Logic__st_1 v_65;
+  int v_66;
   Logic__st_2 ck;
   int pnr_1;
   int current_state_1;

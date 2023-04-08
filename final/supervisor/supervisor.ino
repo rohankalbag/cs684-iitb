@@ -26,7 +26,7 @@ Logic__finallogic_out _res;
 
 #define l1_ir 8
 #define l2_ir 7
-#define f_ir 12
+#define f_ir 4
 
 int penc_l = 0, penc_r = 0;
 
@@ -109,6 +109,9 @@ void setup()
   Serial.begin(115200);
   Logic__finallogic_reset(&mem);
   position_encoder_interrupt_init();
+  pinMode(f_ir, INPUT);
+  pinMode(l1_ir, INPUT);
+  pinMode(l2_ir, INPUT);
 }
 
 
@@ -116,9 +119,9 @@ int sensor_min[NUM_SENSORS] = {936,  932, 944, 914, 938};
 int sensor_max[NUM_SENSORS] = {952, 950, 955, 948, 952};
 void loop()
 {
-  bool ir_d_front = digitalRead(f_ir);
-  bool ir_d_left1 = digitalRead(l1_ir);
-  bool ir_d_left2 = digitalRead(l2_ir);
+  bool ir_d_front = !digitalRead(f_ir);
+  bool ir_d_left1 = !digitalRead(l1_ir);
+  bool ir_d_left2 = !digitalRead(l2_ir);
   
   trs.AnalogRead(sensor_out);
   for(int i = 0; i < NUM_SENSORS; i++){

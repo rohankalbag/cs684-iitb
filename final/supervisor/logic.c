@@ -1,4 +1,4 @@
-/* --- Generated the 9/4/2023 at 4:7 --- */
+/* --- Generated the 9/4/2023 at 4:23 --- */
 /* --- heptagon compiler, version 1.05.00 (compiled mon. jan. 9 12:23:25 CET 2023) --- */
 /* --- Command line: /usr/local/bin/heptc -target c -s finallogic -hepts Logic.ept --- */
 
@@ -155,9 +155,8 @@ void Logic__pidwallalign_step(int ir_d_left1, int ir_d_left2,
 
 void Logic__obstacleavoider_reset(Logic__obstacleavoider_mem* self) {
   Logic__pidwallalign_reset(&self->pidwallalign);
-  self->v_57 = true;
-  self->v_53 = true;
-  self->v_46 = true;
+  self->v_52 = true;
+  self->v_48 = true;
   self->v_40 = true;
   self->v_35 = true;
   self->pnr = false;
@@ -178,18 +177,15 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
   int v_42;
   int v_41;
   int v_39;
+  int v_57;
+  int v_56;
+  int v_54;
+  int v_53;
+  int v_50;
   int v_49;
   int v_47;
+  int v_46;
   int v_45;
-  int v_62;
-  int v_61;
-  int v_59;
-  int v_58;
-  int v_55;
-  int v_54;
-  int v_52;
-  int v_51;
-  int v_50;
   int nr_St_ExitState;
   Logic__st ns_St_ExitState;
   int penc_r_target_St_ExitState;
@@ -222,14 +218,6 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
   int oas_done_St_LeftTurn_1;
   int v_right_St_LeftTurn_1;
   int v_left_St_LeftTurn_1;
-  int nr_St_Delay_1;
-  Logic__st ns_St_Delay_1;
-  int penc_r_target_St_Delay_1;
-  int penc_l_target_St_Delay_1;
-  int timer_St_Delay_1;
-  int oas_done_St_Delay_1;
-  int v_right_St_Delay_1;
-  int v_left_St_Delay_1;
   int nr_St_Reverse_1;
   Logic__st ns_St_Reverse_1;
   int penc_r_target_St_Reverse_1;
@@ -249,51 +237,51 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
     case Logic__St_Reverse_1:
       timer_St_Reverse_1 = self->timer_1;
       oas_done_St_Reverse_1 = false;
-      v_59 = (penc_r+Logic__rev_count);
-      if (self->v_57) {
-        v_58 = true;
+      v_54 = (penc_r+Logic__rev_count);
+      if (self->v_52) {
+        v_53 = true;
       } else {
-        v_58 = r;
+        v_53 = r;
       };
-      if (v_58) {
-        penc_r_target_St_Reverse_1 = v_59;
+      if (v_53) {
+        penc_r_target_St_Reverse_1 = v_54;
       } else {
-        penc_r_target_St_Reverse_1 = self->v_60;
+        penc_r_target_St_Reverse_1 = self->v_55;
       };
-      v_55 = (penc_l+Logic__rev_count);
-      if (self->v_53) {
-        v_54 = true;
+      v_50 = (penc_l+Logic__rev_count);
+      if (self->v_48) {
+        v_49 = true;
       } else {
-        v_54 = r;
+        v_49 = r;
       };
-      if (v_54) {
-        penc_l_target_St_Reverse_1 = v_55;
+      if (v_49) {
+        penc_l_target_St_Reverse_1 = v_50;
       } else {
-        penc_l_target_St_Reverse_1 = self->v_56;
+        penc_l_target_St_Reverse_1 = self->v_51;
       };
       _out->oas_done = oas_done_St_Reverse_1;
       timer = timer_St_Reverse_1;
       penc_l_target = penc_l_target_St_Reverse_1;
-      v_61 = (penc_l<penc_l_target);
-      if (v_61) {
+      v_56 = (penc_l<penc_l_target);
+      if (v_56) {
         v_left_St_Reverse_1 = -80;
       } else {
         v_left_St_Reverse_1 = 0;
       };
-      v_50 = (penc_l>=penc_l_target);
+      v_45 = (penc_l>=penc_l_target);
       _out->v_left = v_left_St_Reverse_1;
       penc_r_target = penc_r_target_St_Reverse_1;
-      v_62 = (penc_r<penc_r_target);
-      if (v_62) {
+      v_57 = (penc_r<penc_r_target);
+      if (v_57) {
         v_right_St_Reverse_1 = -80;
       } else {
         v_right_St_Reverse_1 = 0;
       };
-      v_51 = (penc_r>=penc_r_target);
-      v_52 = (v_50&&v_51);
-      if (v_52) {
+      v_46 = (penc_r>=penc_r_target);
+      v_47 = (v_45&&v_46);
+      if (v_47) {
         nr_St_Reverse_1 = true;
-        ns_St_Reverse_1 = Logic__St_Delay_1;
+        ns_St_Reverse_1 = Logic__St_LeftTurn_1;
       } else {
         nr_St_Reverse_1 = false;
         ns_St_Reverse_1 = Logic__St_Reverse_1;
@@ -301,46 +289,10 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
       _out->v_right = v_right_St_Reverse_1;
       ns = ns_St_Reverse_1;
       nr = nr_St_Reverse_1;
-      self->v_60 = penc_r_target;
-      self->v_57 = false;
-      self->v_56 = penc_l_target;
-      self->v_53 = false;
-      break;
-    case Logic__St_Delay_1:
-      penc_r_target_St_Delay_1 = self->penc_r_target_1;
-      penc_l_target_St_Delay_1 = self->penc_l_target_1;
-      oas_done_St_Delay_1 = false;
-      v_49 = (self->v_48-1);
-      if (self->v_46) {
-        v_47 = true;
-      } else {
-        v_47 = r;
-      };
-      if (v_47) {
-        timer_St_Delay_1 = 100;
-      } else {
-        timer_St_Delay_1 = v_49;
-      };
-      v_right_St_Delay_1 = 0;
-      v_left_St_Delay_1 = 0;
-      _out->oas_done = oas_done_St_Delay_1;
-      timer = timer_St_Delay_1;
-      v_45 = (timer<=0);
-      if (v_45) {
-        nr_St_Delay_1 = true;
-        ns_St_Delay_1 = Logic__St_LeftTurn_1;
-      } else {
-        nr_St_Delay_1 = false;
-        ns_St_Delay_1 = Logic__St_Delay_1;
-      };
-      penc_l_target = penc_l_target_St_Delay_1;
-      _out->v_left = v_left_St_Delay_1;
-      penc_r_target = penc_r_target_St_Delay_1;
-      _out->v_right = v_right_St_Delay_1;
-      ns = ns_St_Delay_1;
-      nr = nr_St_Delay_1;
-      self->v_48 = timer;
-      self->v_46 = false;
+      self->v_55 = penc_r_target;
+      self->v_52 = false;
+      self->v_51 = penc_l_target;
+      self->v_48 = false;
       break;
     case Logic__St_LeftTurn_1:
       penc_l_target_St_LeftTurn_1 = self->penc_l_target_1;
@@ -365,7 +317,7 @@ void Logic__obstacleavoider_step(int ir_d_left1, int ir_d_left2,
       penc_r_target = penc_r_target_St_LeftTurn_1;
       v_44 = (penc_r<penc_r_target);
       if (v_44) {
-        v_right_St_LeftTurn_1 = 90;
+        v_right_St_LeftTurn_1 = 120;
       } else {
         v_right_St_LeftTurn_1 = 0;
       };
@@ -481,8 +433,8 @@ void Logic__finallogic_reset(Logic__finallogic_mem* self) {
   Logic__pidline_reset(&self->pidline);
   Logic__obstacleavoider_reset(&self->obstacleavoider);
   self->pnr_1 = false;
-  self->v_71 = false;
-  self->v_70 = Logic__St_1_LineFollowing;
+  self->v_66 = false;
+  self->v_65 = Logic__St_1_LineFollowing;
   self->ck = Logic__St_2_StartState;
 }
 
@@ -494,13 +446,13 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
   Logic__pidline_out Logic__pidline_out_st;
   Logic__obstacleavoider_out Logic__obstacleavoider_out_st;
   
-  int v_69;
-  int v_68;
-  int v_67;
-  int v_66;
-  int v_65;
   int v_64;
   int v_63;
+  int v_62;
+  int v_61;
+  int v_60;
+  int v_59;
+  int v_58;
   int v;
   int r_3;
   int oas_done;
@@ -521,15 +473,15 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
   int r;
   int nr;
   int pnr;
-  int v_80;
-  int v_79;
-  int v_78;
-  int v_77;
-  int v_76;
   int v_75;
   int v_74;
   int v_73;
   int v_72;
+  int v_71;
+  int v_70;
+  int v_69;
+  int v_68;
+  int v_67;
   int nr_1_St_2_WhiteLineFollower;
   Logic__st_2 ns_1_St_2_WhiteLineFollower;
   int current_state_St_2_WhiteLineFollower;
@@ -550,16 +502,16 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
       current_state_St_2_StartState = 1;
       v_right_St_2_StartState = 100;
       v_left_St_2_StartState = 100;
-      v_79 = (cfl<Logic__white_threshold);
-      v_77 = (ccl<Logic__white_threshold);
-      v_75 = (ccc<Logic__white_threshold);
-      v_73 = (ccr<Logic__white_threshold);
-      v_72 = (cfr<Logic__white_threshold);
-      v_74 = (v_72||v_73);
-      v_76 = (v_74||v_75);
-      v_78 = (v_76||v_77);
-      v_80 = (v_78||v_79);
-      if (v_80) {
+      v_74 = (cfl<Logic__white_threshold);
+      v_72 = (ccl<Logic__white_threshold);
+      v_70 = (ccc<Logic__white_threshold);
+      v_68 = (ccr<Logic__white_threshold);
+      v_67 = (cfr<Logic__white_threshold);
+      v_69 = (v_67||v_68);
+      v_71 = (v_69||v_70);
+      v_73 = (v_71||v_72);
+      v_75 = (v_73||v_74);
+      if (v_75) {
         nr_1_St_2_StartState = true;
         ns_1_St_2_StartState = Logic__St_2_WhiteLineFollower;
       } else {
@@ -576,13 +528,13 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
       if (r_1) {
         pnr = false;
       } else {
-        pnr = self->v_71;
+        pnr = self->v_66;
       };
       r = pnr;
       if (r_1) {
         ck_1 = Logic__St_1_LineFollowing;
       } else {
-        ck_1 = self->v_70;
+        ck_1 = self->v_65;
       };
       nr_1_St_2_WhiteLineFollower = false;
       ns_1_St_2_WhiteLineFollower = Logic__St_2_WhiteLineFollower;
@@ -591,8 +543,13 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
       switch (ck_1) {
         case Logic__St_1_LineFollowing:
           current_state_St_2_WhiteLineFollower_St_1_LineFollowing = 2;
-          nr_St_1_LineFollowing = false;
-          ns_St_1_LineFollowing = Logic__St_1_LineFollowing;
+          if (ir_d_front) {
+            nr_St_1_LineFollowing = true;
+            ns_St_1_LineFollowing = Logic__St_1_ObstacleAvoider;
+          } else {
+            nr_St_1_LineFollowing = false;
+            ns_St_1_LineFollowing = Logic__St_1_LineFollowing;
+          };
           r_4 = (r_1||r);
           if (r_4) {
             Logic__pidline_reset(&self->pidline);
@@ -608,15 +565,15 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
           nr = nr_St_1_LineFollowing;
           break;
         case Logic__St_1_ObstacleAvoider:
-          v_69 = (cfl>=Logic__white_threshold);
-          v_67 = (ccl>=Logic__white_threshold);
-          v_65 = (ccc>=Logic__white_threshold);
-          v_63 = (ccr>=Logic__white_threshold);
+          v_64 = (cfl>=Logic__white_threshold);
+          v_62 = (ccl>=Logic__white_threshold);
+          v_60 = (ccc>=Logic__white_threshold);
+          v_58 = (ccr>=Logic__white_threshold);
           v = (cfr>=Logic__white_threshold);
-          v_64 = (v||v_63);
-          v_66 = (v_64||v_65);
-          v_68 = (v_66||v_67);
-          white_line = (v_68||v_69);
+          v_59 = (v||v_58);
+          v_61 = (v_59||v_60);
+          v_63 = (v_61||v_62);
+          white_line = (v_63||v_64);
           current_state_St_2_WhiteLineFollower_St_1_ObstacleAvoider = 3;
           r_3 = (r_1||r);
           if (r_3) {
@@ -657,8 +614,8 @@ void Logic__finallogic_step(int cfr, int ccr, int ccc, int ccl, int cfl,
   self->pnr_1 = nr_1;
   switch (self->ck) {
     case Logic__St_2_WhiteLineFollower:
-      self->v_71 = nr;
-      self->v_70 = ns;
+      self->v_66 = nr;
+      self->v_65 = ns;
       break;
     default:
       break;

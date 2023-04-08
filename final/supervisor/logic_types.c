@@ -1,4 +1,4 @@
-/* --- Generated the 9/4/2023 at 4:7 --- */
+/* --- Generated the 9/4/2023 at 4:23 --- */
 /* --- heptagon compiler, version 1.05.00 (compiled mon. jan. 9 12:23:25 CET 2023) --- */
 /* --- Command line: /usr/local/bin/heptc -target c -s finallogic -hepts Logic.ept --- */
 
@@ -69,9 +69,6 @@ Logic__st Logic__st_of_string(char* s) {
   if ((strcmp(s, "St_Delay_2")==0)) {
     return Logic__St_Delay_2;
   };
-  if ((strcmp(s, "St_Delay_1")==0)) {
-    return Logic__St_Delay_1;
-  };
 }
 
 char* string_of_Logic__st(Logic__st x, char* buf) {
@@ -90,9 +87,6 @@ char* string_of_Logic__st(Logic__st x, char* buf) {
       break;
     case Logic__St_Delay_2:
       strcpy(buf, "St_Delay_2");
-      break;
-    case Logic__St_Delay_1:
-      strcpy(buf, "St_Delay_1");
       break;
     default:
       break;
