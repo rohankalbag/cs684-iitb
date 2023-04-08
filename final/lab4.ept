@@ -1,0 +1,247 @@
+(*left_1 first ahead left_2 second*)
+
+const rev_count: int = 5 (*no of pulses to reverse for*)
+
+const init_right_turn_count: int = 13
+
+const rev_speed: int = 80
+const right_turn_speed: int = 90
+const left_turn_speed: int = 90
+const diff_offset : int = 5
+
+const pid_fwd_speed: int = 40
+const fwd_speed: int = 40
+
+const i_kp: int = 1
+const i_kd: int  = 120
+const i_ki: int  = 10000
+
+const max_drive: int = 110
+
+node obstavoider(ir_d_front, ir_d_left1, ir_d_left2: bool; penc_l, penc_r: int;) 
+   returns (dir, v_left, v_right, cs: int)  
+   (*  
+     0 - forward 
+     1 - back
+     2 - left turn 
+     3 - right turn
+     4 - soft left
+     5 - soft right
+     6 - stop 
+   *) 
+ var 
+ last oas_busy: bool = false; 
+ last timer: int;
+ last current_state: int; 
+ last penc_l_target: int;
+ last penc_r_target: int;
+ let 
+   (* this is to check which state fsm is in, add primary cs to primary output and uncomment below line *) 
+   cs = current_state; 
+  
+   automaton
+    state MoveDefault  
+      do 
+        current_state = 1; 
+        dir = 0;
+        v_left = fwd_speed;
+        v_right = fwd_speed; 
+        oas_busy = false; 
+      unless (ir_d_front) then OAS 
+
+     state OAS do 
+       automaton  
+        state Reverse_1 do 
+          current_state = 21; 
+          penc_l_target = (penc_l + rev_count) -> pre(penc_l_target);
+          penc_r_target = (penc_r + rev_count) -> pre(penc_r_target);
+          dir = 1;
+          v_left = if(penc_l < penc_l_target) then rev_speed else 0;
+          v_right = if(penc_r < penc_r_target) then rev_speed else 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then  Delay_1
+
+
+        state Delay_1 do
+          current_state = 211; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+        until timer <= 0 then RightTurn_1
+        
+  
+        state RightTurn_1 do
+          current_state = 22; 
+          penc_l_target = (penc_l + init_right_turn_count) -> pre(penc_l_target);
+          dir = 3;
+          v_left = if(penc_l < penc_l_target) then right_turn_speed else 0;
+          v_right = 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target ) then Delay_2
+
+        state Delay_2 do
+          current_state = 221; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+        until timer <= 0 then Forward_1 
+
+        state PIDFollower
+          var error_sum, raw_drive, drive, error: int;
+          do
+            error = (ir_d_left1 - ir_d_left2) + diff_offset;
+            error_sum = 0 -> (pre(error_sum) + error);
+            raw_drive = ( error - ( 0->pre(error)  )) / i_kd +  error / i_kp + error_sum / i_ki;
+            current_state = 288;
+        
+            drive = if(raw_drive > max_drive) then max_drive else if(raw_drive < 0-max_drive) then 0-max_drive else raw_drive;
+            v_left = pid_fwd_speed - drive;
+            v_right = pid_fwd_speed + drive;
+            out_drive = drive;
+            dir = 0;
+
+        (* state Forward_1 do 
+          current_state = 23; 
+          penc_l_target = (penc_l + fwd_count_1) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count_1) -> pre(penc_r_target);
+          dir = 0;
+          v_left = if(penc_l < penc_l_target) then fwd_speed else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then Delay_3
+
+
+        state Delay_3 do
+          current_state = 241; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+        until timer <= 0 then LeftTurn_1
+
+        state LeftTurn_1 do
+          current_state = 25; 
+          penc_r_target = (penc_r + init_left_turn_count) -> pre(penc_r_target);
+          dir = 2;
+          v_left = 0;
+          v_right = if(penc_r < penc_r_target) then left_turn_speed else 0;
+          oas_busy = true;
+        until (penc_r >= penc_r_target ) then Delay_4
+        
+
+        state Delay_4 do
+          current_state = 251; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+        until timer <= 0 then Forward_2
+
+
+        state Forward_2 do 
+          current_state = 23; 
+          penc_l_target = (penc_l + fwd_count_1) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count_1) -> pre(penc_r_target);
+          dir = 0;
+          v_left = if(penc_l < penc_l_target) then fwd_speed else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then Forward_IR_2
+
+
+        state Forward_IR_2 do 
+          current_state = 24; 
+          dir = 0;
+          v_left = if(penc_l < penc_l_target) then fwd_speed else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_busy = true;
+        until not ir_d_left then Forward_3
+
+        state Forward_3 do 
+          current_state = 25; 
+          penc_l_target = (penc_l + fwd_count_2) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count_2) -> pre(penc_r_target);
+          dir = 0;
+          v_left = if(penc_l < penc_l_target) then fwd_speed else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then Delay_5
+
+
+        state Delay_5 do
+          current_state = 251; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 150 -> pre(timer) - 1;
+        until timer <= 0 then LeftTurn_2
+
+        state LeftTurn_2 do
+          current_state = 26; 
+          penc_r_target = (penc_r + init_left_turn_count) -> pre(penc_r_target);
+          dir = 2;
+          v_left = 0;
+          v_right = if(penc_r < penc_r_target) then left_turn_speed else 0;
+          oas_busy = true;
+        until (penc_r >= penc_r_target ) then Delay_6
+
+
+
+        state Delay_6 do
+          current_state = 261; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 150 -> pre(timer) - 1;
+        until timer <= 0 then Forward_4
+
+        state Forward_4 do 
+          current_state = 27; 
+          penc_l_target = (penc_l + fwd_count_3) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count_3) -> pre(penc_r_target);
+          dir = 0;
+          v_left = if(penc_l < penc_l_target) then fwd_speed else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then Delay_7
+
+
+        state Delay_7 do
+          current_state = 261; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 150 -> pre(timer) - 1;
+        until timer <= 0 then RightTurn_2
+
+
+        state RightTurn_2 do
+          current_state = 27; 
+          penc_l_target = (penc_l + init_right_turn_count) -> pre(penc_l_target);
+          dir = 3;
+          v_left = if(penc_l < penc_l_target) then right_turn_speed else 0;
+          v_right = 0;
+          oas_busy = true;
+        until (penc_l >= penc_l_target ) then Delay_8
+
+        state Delay_8 do
+          current_state = 28; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+        until timer <= 0 then Idle
+
+        state Idle do
+          current_state = 29; 
+          dir = 0;
+          v_left = 0;
+          v_right = 0;
+          oas_busy = false;
+        until timer <= 0 then Idle *)
+      end
+      until (not oas_busy) then MoveDefault   
+  end
+ tel
