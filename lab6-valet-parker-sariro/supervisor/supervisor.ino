@@ -1,0 +1,171 @@
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
+#include <stdio.h>
+#include "logic_types.h"
+#include "logic.c"
+#include "TRSensors.h"
+
+#define NUM_SENSORS 5
+
+TRSensors trs =   TRSensors();
+unsigned int sensor_out[NUM_SENSORS];
+
+Logic__finallogic_mem mem;
+Logic__finallogic_out _res;
+
+#define IN1 0
+#define IN2 1
+#define IN3 2
+#define IN4 3
+
+#define ENA 5
+#define ENB 6
+
+#define motor_left_penc 2
+#define motor_right_penc  3
+
+#define l1_ir 1
+#define l2_ir 0
+#define l3_ir 7
+#define f_ir 4
+
+//#define l1_ir 9
+//#define l2_ir 8
+//#define l3_ir 7
+//#define f_ir 4
+
+int penc_l = 0, penc_r = 0;
+
+void configure_motors_outputs(void){
+  DDRC |= ((1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4));
+  DDRD |= ((1 << ENA) | (1 << ENB));
+
+  PORTD |= ((1<<ENA) | (1<<ENB));
+}
+
+void configure_encoder_inputs(void)
+{
+  DDRD &= ~(1 << motor_left_penc); //Set the direction of the PORTD 2 pin as input
+  PORTD |= (1 << motor_left_penc); //Enable internal pull-up for PORTD 2 pin
+  DDRD &= ~(1 << motor_right_penc); //Set the direction of the PORTD 3 pin as input
+  PORTD |= (1 << motor_right_penc); //Enable internal pull-up for PORTD 3 pin
+}
+
+void configure_ir_sensors_inputs(void){
+  DDRD &= ~((1<<f_ir)|(1<<l3_ir));
+  DDRB &= ~((1<<l3_ir)|(1<<l2_ir));
+  PORTD |= ((1<<f_ir)|(1<<l3_ir));
+  PORTB |= ((1<<l3_ir)|(1<<l2_ir));
+}
+
+void read_ir_sensor_inputs(bool *ir_d_front, bool *ir_d_left1, bool *ir_d_left2, bool* ir_d_left3){
+  *ir_d_front = !(PIND & (1 << f_ir));
+
+  *ir_d_left3 = !(PIND & (1 << l3_ir));
+
+  *ir_d_left2 = !(PINB & (1 << l2_ir));
+
+  *ir_d_left1 = !(PINB & (1 << l1_ir));
+}
+
+ISR(INT0_vect){
+  penc_r++;
+}
+
+ISR(INT1_vect){
+  penc_l++;
+}
+
+void position_encoder_interrupt_init (void)
+{
+  cli(); //Clears the global interrupt
+  EICRA = EICRA | 0x0A; // INT0, INT1 is set to trigger with falling edge
+  EIMSK = EIMSK | 0x03; // Enable Interrupt INT0, INT1 for left position encoder
+  sei(); // Enables the global interrupt
+}
+
+
+
+void timer1_init() {//Set Register Values for starting Fast 8-bit PWM
+  TCCR0A = 0xA3;
+  TCCR0B = 0x03;
+  TCNT0 = 0x00;
+  OCR0A = 0x00;
+  OCR0B = 0x00;
+}
+void tr_init() {
+  for (int i = 0; i < 400; i++)  // make the calibration take about 10 seconds
+  {
+    trs.calibrate();       // reads all sensors 10 times
+  }
+}
+
+void raw_velocity (unsigned char left_motor, unsigned char right_motor) {
+  OCR0A = (unsigned char)left_motor;
+  OCR0B = (unsigned char)right_motor; 
+}
+
+void velocity (int left_motor, int right_motor) {
+  if(left_motor >= 0 && right_motor >= 0){
+    PORTC &= ~((1<<IN1) | (1<<IN4) );
+    PORTC |=  ((1<<IN2) | (1<<IN3) );
+  }else if (left_motor <= 0 && right_motor <= 0){
+    PORTC &= ~((1<<IN2) | (1<<IN3) );
+    PORTC |=  ((1<<IN1)  | (1<<IN4));
+  }else  if (left_motor <= 0 && right_motor >= 0){
+    PORTC &= ~((1<<IN1) | (1<<IN3) );
+    PORTC |=  ((1<<IN2)  | (1<<IN4));
+  }else if(left_motor >= 0 && right_motor <= 0){
+    PORTC &= ~((1<<IN2) | (1<<IN4) );
+    PORTC |=  ((1<<IN1)  | (1<<IN3));
+  }
+  raw_velocity(abs(left_motor), abs(right_motor));
+}
+
+int sensor_avg[NUM_SENSORS] = {0, 0, 0, 0, 0};
+
+void setup()
+{
+  
+  configure_motors_outputs();
+  configure_ir_sensors_inputs();
+  timer1_init();
+  //tr_init();
+  Serial.begin(115200);
+  Logic__finallogic_reset(&mem);
+  position_encoder_interrupt_init();
+  pinMode(f_ir, INPUT);
+  pinMode(l1_ir, INPUT);
+  pinMode(l2_ir, INPUT);
+  pinMode(l3_ir, INPUT);
+  trs.AnalogRead(sensor_avg);
+  delay(1000);
+}
+
+
+int sensor_min[NUM_SENSORS] = {350,  350, 410, 232, 391};
+int sensor_max[NUM_SENSORS] = {975, 973, 977, 971, 977};
+
+void loop()
+{
+  bool ir_d_front, ir_d_left1, ir_d_left2, ir_d_left3 ;
+  read_ir_sensor_inputs(&ir_d_front, &ir_d_left1, &ir_d_left2, &ir_d_left3);
+  trs.AnalogRead(sensor_out);
+  for(int i = 0; i < NUM_SENSORS; i++){
+    int val = sensor_out[i];
+    sensor_out[i] =  ( (double) max(0, (val - sensor_min[i]))) / (sensor_max[i] - sensor_min[i]) * 1024  ;
+    Serial.print(sensor_out[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+
+  Logic__finallogic_step(sensor_out[0],sensor_out[1],sensor_out[2],sensor_out[3],sensor_out[4], penc_l, penc_r, ir_d_front, ir_d_left1, ir_d_left2, ir_d_left3,
+                                &_res,
+                                &mem); 
+  velocity(_res.v_left, _res.v_right);
+  
+  
+
+}
+

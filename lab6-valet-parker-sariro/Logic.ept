@@ -1,0 +1,228 @@
+const white_threshold: int = 780
+const black_white_threshold: int = 500
+const start_fwd_speed: int = 70
+const fwd_count: int = 10
+const fwd_count_1: int = 10
+const rev_count: int = 3 (*no of pulses to reverse for*)
+const init_left_turn_count: int = 10 (*rot encoder pulses threshold*)
+const init_right_turn_count: int = 3 
+const rev_speed: int = 110
+const fwd_speed: int = 80
+const fwd_speed_1: int = 80
+const right_turn_speed: int = 90
+const left_turn_speed: int = 110
+
+const pid_fwd_speed_wall: int = 60
+const i_kp_wall: int = 1
+const i_kd_wall: int  = 120
+const i_ki_wall: int  = 10000
+const max_drive_wall: int = 130
+const white_threshold_wall: int = 960
+
+
+const i_kp_line: int = 2
+const i_kd_line: int  = 200 (*140*)
+const i_ki_line: int  = 10000
+const w_far: int = 6
+const w_cent: int = 30
+const pid_fwd_speed_line: int = 90
+const pid_fwd_black_speed_line: int = 70
+const max_drive_line: int = 110
+const pid_rev_count: int = 1
+const pid_rev_speed: int = 90
+
+const up_cap: int  = 1024
+
+
+
+node pidline(cfr, ccr, ccc, ccl, cfl, penc_l, penc_r: int) 
+  returns (v_left, v_right: int)
+  var error_sum, raw_drive, drive, error: int;
+  let
+    error = cfr / w_far + ccr / w_cent - ccl / w_cent - cfl / w_far ;
+    error_sum = 0 -> (pre(error_sum) + error);
+    raw_drive = (error - (0 -> pre(error))) / i_kd_line +  error / i_kp_line + error_sum / i_ki_line;
+
+    drive = if(raw_drive > max_drive_line) then max_drive_line else if(raw_drive < 0-max_drive_line) then 0-max_drive_line else raw_drive;
+    automaton
+      state OnLine
+      do
+        v_left = pid_fwd_speed_line - drive;
+        v_right = pid_fwd_speed_line + drive;
+      until not (cfr >= white_threshold or ccr >= white_threshold or ccc >= white_threshold or ccl >= white_threshold or cfl >= white_threshold) then NotOnLine
+      state NotOnLine
+      do
+        v_left = -pid_rev_speed;
+        v_right = -pid_rev_speed;
+      until (cfr >= white_threshold or ccr >= white_threshold or ccc >= white_threshold or ccl >= white_threshold or cfl >= white_threshold) then OnLine
+    end
+  tel
+
+node pidline_black(bcfr, bccr, bccc, bccl, bcfl, penc_l, penc_r: int) 
+  returns (v_left, v_right: int)
+  var error_sum, raw_drive, drive, error: int;
+  cfr, ccr, ccc, ccl, cfl: int;
+  let
+    cfr = if(bcfr > up_cap) then  0 else up_cap - bcfr;
+    ccr = if(bccr > up_cap) then  0 else up_cap - bccr;
+    ccc = if(bccc > up_cap) then  0 else up_cap - bccc;
+    ccl = if(bccl > up_cap) then  0 else up_cap - bccl;
+    cfl = if(bcfl > up_cap) then  0 else up_cap - bcfl;
+    error = cfr / w_far + ccr / w_cent - ccl / w_cent - cfl / w_far ;
+    error_sum = 0 -> (pre(error_sum) + error);
+    raw_drive = (error - (0 -> pre(error))) / i_kd_line +  error / i_kp_line + error_sum / i_ki_line;
+
+    drive = if(raw_drive > max_drive_line) then max_drive_line else if(raw_drive < 0-max_drive_line) then 0-max_drive_line else raw_drive;
+    automaton
+      state OnLine
+      do
+        v_left = pid_fwd_black_speed_line - drive;
+        v_right = pid_fwd_black_speed_line + drive;
+      until not (cfr >= black_white_threshold or ccr >= black_white_threshold or ccc >= black_white_threshold or ccl >= black_white_threshold or cfl >= black_white_threshold) then NotOnLine
+      state NotOnLine
+      do
+        v_left = -pid_rev_speed;
+        v_right = -pid_rev_speed;
+      until (cfr >= black_white_threshold or ccr >= black_white_threshold or ccc >= black_white_threshold or ccl >= black_white_threshold or cfl >= black_white_threshold) then OnLine
+    end
+  tel
+
+node pidwallalign(ir_d_left1, ir_d_left2, ir_d_left3: bool) 
+  returns (v_left, v_right: int)  
+  var error_sum, raw_drive, drive, error: int;
+  let
+    error =  if(ir_d_left1) then (if(ir_d_left3) then 15 else 30) else (if(ir_d_left3) then (if ir_d_left2 then -30 else -70) else -30);
+    error_sum = 0 -> (pre(error_sum) + error);
+    raw_drive = ( error - ( 0 -> pre(error)  )) / i_kd_wall +  error / i_kp_wall + error_sum / i_ki_wall;
+    drive = if(raw_drive > max_drive_wall) then max_drive_wall else if(raw_drive < 0-max_drive_wall) then 0-max_drive_wall else raw_drive;
+    v_left = pid_fwd_speed_wall - drive;
+    v_right = pid_fwd_speed_wall + drive;
+  tel
+
+node obstacleavoider(ir_d_left1, ir_d_left2, ir_d_left3, white_line: bool; penc_l, penc_r:int)
+  returns (v_left, v_right: int; oas_done: bool)
+  
+  var last timer: int;
+  last penc_l_target: int;
+  last penc_r_target: int;
+  
+  let
+     automaton  
+        
+        state Reverse_1
+        do 
+          penc_l_target = (penc_l + rev_count) -> pre(penc_l_target);
+          penc_r_target = (penc_r + rev_count) -> pre(penc_r_target);
+          v_left = if(penc_l < penc_l_target) then -rev_speed else 0;
+          v_right = if(penc_r < penc_r_target) then -rev_speed else 0;
+          oas_done = false;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then  LeftTurn_1
+
+        
+        state LeftTurn_1 do
+          penc_r_target = (penc_r + init_left_turn_count) -> pre(penc_r_target);
+          v_left = -40;
+          v_right = left_turn_speed;
+          oas_done = false;
+        until (penc_r >= penc_r_target ) then Delay_2
+
+        state Delay_2
+        do
+          v_left = 0;
+          v_right = 0;
+          timer = 100 -> pre(timer) - 1;
+          oas_done = false;
+        until timer <= 0 then PIDWallFollower
+
+        state PIDWallFollower
+        do
+          (v_left, v_right) = pidwallalign(ir_d_left1, ir_d_left2, ir_d_left3);
+          oas_done = false;
+        until white_line then Reverse_2
+        state Reverse_2
+        do 
+          penc_l_target = (penc_l + fwd_count) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count) -> pre(penc_r_target);
+          v_left = if(penc_l < penc_l_target) then fwd_speed-20 else 0;
+          v_right = if(penc_r < penc_r_target) then fwd_speed else 0;
+          oas_done = false;
+        until (penc_l >= penc_l_target and penc_r >= penc_r_target) then  ExitState
+
+        state ExitState
+        do
+          v_left = 0;
+          v_right = 0;
+          oas_done = true;
+
+      end 
+  tel
+
+node parkingnode(cfr, ccr, ccc, ccl, cfl, penc_l, penc_r: int; ir_d_left1, ir_d_left2, ir_d_left3: bool)
+  returns (v_left, v_right: int)
+  
+  var last timer: int;
+  last penc_r_target: int;
+  last penc_l_target: int;
+  let
+     automaton  
+        state LineFollowing
+        do
+          (v_left, v_right) = pidline_black(cfr, ccr, ccc, ccl, cfl, penc_l, penc_r);
+          timer = 800 -> (pre(timer) -1);
+        until timer <= 0 and (not (ir_d_left1 or ir_d_left2 or ir_d_left3)) then RightTurn_1
+
+        state RightTurn_1 do
+          penc_r_target = (penc_r + init_right_turn_count) -> pre(penc_r_target);
+          v_left = right_turn_speed;
+          v_right = -right_turn_speed;
+        until (penc_r >= penc_r_target ) then Forward_1
+
+        state Forward_1
+        do 
+          penc_l_target = (penc_l + fwd_count_1) -> pre(penc_l_target);
+          penc_r_target = (penc_r + fwd_count_1) -> pre(penc_r_target);
+          v_left = fwd_speed_1 ;
+          v_right = fwd_speed_1 ;
+        until (penc_l >= penc_l_target or penc_r >= penc_r_target) then  ExitState
+
+        state ExitState
+        do
+          v_left = 0;
+          v_right = 0;
+
+      end 
+  tel
+
+node finallogic(cfr, ccr, ccc, ccl, cfl, penc_l, penc_r: int; ir_d_front, ir_d_left1, ir_d_left2, ir_d_left3: bool) 
+  returns (v_left, v_right, cs: int)
+  var last current_state: int;
+  let
+    cs = current_state;
+  automaton
+    state StartState
+    do
+      v_left = 100;
+      v_right = 100;
+      current_state = 1;
+    until cfr < white_threshold or ccr < white_threshold or ccc < white_threshold or ccl < white_threshold or cfl < white_threshold then WhiteLineFollower
+
+    state WhiteLineFollower
+    do
+      automaton
+        state LineFollowing
+        do
+          current_state = 2;
+          (v_left, v_right) = pidline(cfr, ccr, ccc, ccl, cfl, penc_l, penc_r);
+        until ir_d_front then ObstacleAvoider
+        state ObstacleAvoider
+          var oas_done, white_line: bool;
+
+        do
+          current_state = 3;
+          white_line = ccl >= white_threshold_wall;
+          (v_left, v_right, oas_done) = obstacleavoider(ir_d_left1, ir_d_left2, ir_d_left3, white_line, penc_l, penc_r);
+        until oas_done then LineFollowing
+      end
+
+  end
+tel
